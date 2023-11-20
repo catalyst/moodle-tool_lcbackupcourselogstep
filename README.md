@@ -1,4 +1,5 @@
 # Backup course log (Life cycle step)
+Backup course log (mdl_logstore_standard_log table) records into a standard format
 
 Installation
 ============
