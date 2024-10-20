@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="admin/tool/lcbackupcourselogstep/db" VERSION="2024102000" COMMENT="XMLDB file for Moodle tool/lcbackupcourselogstep"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="tool_lcbackupcourselogstep_metadata" COMMENT="Metadata for course logs.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="shortname" TYPE="char" LENGTH="255" NOTNULL="true"/>
+        <FIELD NAME="fullname" TYPE="char" LENGTH="255" NOTNULL="true"/>
+        <FIELD NAME="oldcourseid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="fileid" TYPE="int" LENGTH="10" NOTNULL="true"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" COMMENT="Timestamp when the log file was created"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="fileid_fk" TYPE="foreign" FIELDS="fileid" REFTABLE="files" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
+  </TABLES>
+</XMLDB>

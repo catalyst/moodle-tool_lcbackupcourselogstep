@@ -46,12 +46,11 @@ class log_table extends \table_sql
 
         // Build the SQL.
         $fields = 'f.id as id,
-                   co.id as courseid, co.shortname as courseshortname, co.fullname as coursefullname,
-                   f.filename as filename, f.timecreated as createdat';
-
+                   md.oldcourseid as courseid, md.shortname as courseshortname, md.fullname as coursefullname,
+                   f.filename as filename, f.filesize as filesize, f.timecreated as createdat';
         $from = '{files} f
                  JOIN {context} c ON c.id = f.contextid
-                 JOIN {course} co ON co.id = c.instanceid';
+                 LEFT JOIN {tool_lcbackupcourselogstep_metadata} md ON f.id = md.fileid';         
 
         $where = ["f.component = :component AND filename <> '.'"];
         $params = ['component' => 'tool_lcbackupcourselogstep'];
@@ -59,17 +58,17 @@ class log_table extends \table_sql
         // Filtering.
         if ($filterdata) {
             if ($filterdata->shortname) {
-                $where[] = $DB->sql_like('co.shortname', ':shortname', false, false);
+                $where[] = $DB->sql_like('md.shortname', ':shortname', false, false);
                 $params['shortname'] = '%' . $DB->sql_like_escape($filterdata->shortname) . '%';
             }
 
             if ($filterdata->fullname) {
-                $where[] = $DB->sql_like('co.fullname', ':fullname', false, false);
+                $where[] = $DB->sql_like('md.fullname', ':fullname', false, false);
                 $params['fullname'] = '%' . $DB->sql_like_escape($filterdata->fullname) . '%';
             }
 
             if ($filterdata->courseid) {
-                $where[] = 'co.id = :courseid';
+                $where[] = 'md.oldcourseid = :courseid';
                 $params['courseid'] = $filterdata->courseid;
             }
         }
@@ -85,6 +84,7 @@ class log_table extends \table_sql
             'courseshortname',
             'coursefullname',
             'filename',
+            'filesize',
             'createdat',
             'actions',
         ]);
@@ -94,12 +94,14 @@ class log_table extends \table_sql
             get_string('course_shortname_header', 'tool_lcbackupcourselogstep'),
             get_string('course_fullname_header', 'tool_lcbackupcourselogstep'),
             get_string('filename_header', 'tool_lcbackupcourselogstep'),
+            get_string('filesize_header', 'tool_lcbackupcoursestep'),
             get_string('createdat_header', 'tool_lcbackupcourselogstep'),
             get_string('actions_header', 'tool_lcbackupcourselogstep'),
         ]);
 
         // Set default sorting.
         $this->sortable(true, 'createdat', SORT_DESC);
+        $this->sortable(true, 'filesize', SORT_DESC);
         $this->collapsible(true);
         $this->initialbars(true);
         $this->set_attribute('class', 'admintable generaltable');
@@ -139,6 +141,16 @@ class log_table extends \table_sql
     public function col_createdat($row)
     {
         return userdate($row->createdat);
+    }
+
+    /**
+     * Display size in a user-friendly format.
+     *
+     * @param $row
+     * @return string
+     */
+    public function col_filesize($row) {
+        return display_size($row->filesize);
     }
 
 }

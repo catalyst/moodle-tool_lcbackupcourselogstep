@@ -82,7 +82,7 @@ class step extends libbase {
 
         // Prepare file record.
         $filerecord = [
-            'contextid' => \context_course::instance($course->id)->id,
+            'contextid' => \context_system::instance()->id,
             'component' => 'tool_lcbackupcourselogstep',
             'filearea' => 'course_log',
             'itemid' => $instanceid,
@@ -99,7 +99,15 @@ class step extends libbase {
         }
 
         // Write data to file.
-        dataformat::write_data_to_filearea($filerecord, $fileformat, $columns, $logs);
+        $newfile = dataformat::write_data_to_filearea($filerecord, $fileformat, $columns, $logs);
+
+        $DB->insert_record('tool_lcbackupcourselogstep_metadata', [
+            'shortname' => $course->shortname,
+            'fullname' => $course->fullname,
+            'oldcourseid' => $course->id,
+            'fileid' => $newfile->get_id(),
+            'timecreated' => time()
+        ]);
 
         // Proceed.
         return step_response::proceed();
