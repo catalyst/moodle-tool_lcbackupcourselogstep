@@ -14,14 +14,28 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Course backup logs table.
+ *
+ * @package     tool_lcbackupcourselogstep
+ * @copyright   2024 Catalyst IT
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 namespace tool_lcbackupcourselogstep\lifecycle;
 
 defined('MOODLE_INTERNAL') || die;
 
 require_once($CFG->libdir . '/tablelib.php');
 
-class log_table extends \table_sql
-{
+/**
+ * Backup log table.
+ *
+ * @package     tool_lcbackupcourselogstep
+ * @copyright   2024 Catalyst IT
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class log_table extends \table_sql {
 
     /**
      * @var array "cached" lang strings
@@ -32,26 +46,25 @@ class log_table extends \table_sql
      * Constructor for delayed_courses_table.
      *
      * @throws \coding_exception
+     * @param array $filterdata Filter data.
      */
-    public function __construct($filterdata = [])
-    {
+    public function __construct($filterdata = []) {
         global $DB;
 
         parent::__construct('tool_lcbackupcourselogstep-log');
 
-        // Action buttons string
+        // Action buttons string.
         $this->strings = [
-            'download' => get_string('download')
+            'download' => get_string('download'),
         ];
 
         // Build the SQL.
         $fields = 'f.id as id,
-                   co.id as courseid, co.shortname as courseshortname, co.fullname as coursefullname,
-                   f.filename as filename, f.timecreated as createdat';
-
+                   md.oldcourseid as courseid, md.shortname as courseshortname, md.fullname as coursefullname,
+                   f.filename as filename, f.filesize as filesize, f.timecreated as createdat';
         $from = '{files} f
                  JOIN {context} c ON c.id = f.contextid
-                 JOIN {course} co ON co.id = c.instanceid';
+                 LEFT JOIN {tool_lcbackupcourselogstep_metadata} md ON f.id = md.fileid';
 
         $where = ["f.component = :component AND filename <> '.'"];
         $params = ['component' => 'tool_lcbackupcourselogstep'];
@@ -59,17 +72,17 @@ class log_table extends \table_sql
         // Filtering.
         if ($filterdata) {
             if ($filterdata->shortname) {
-                $where[] = $DB->sql_like('co.shortname', ':shortname', false, false);
+                $where[] = $DB->sql_like('md.shortname', ':shortname', false, false);
                 $params['shortname'] = '%' . $DB->sql_like_escape($filterdata->shortname) . '%';
             }
 
             if ($filterdata->fullname) {
-                $where[] = $DB->sql_like('co.fullname', ':fullname', false, false);
+                $where[] = $DB->sql_like('md.fullname', ':fullname', false, false);
                 $params['fullname'] = '%' . $DB->sql_like_escape($filterdata->fullname) . '%';
             }
 
             if ($filterdata->courseid) {
-                $where[] = 'co.id = :courseid';
+                $where[] = 'md.oldcourseid = :courseid';
                 $params['courseid'] = $filterdata->courseid;
             }
         }
@@ -78,13 +91,13 @@ class log_table extends \table_sql
 
         $this->set_sql($fields, $from, $where, $params);
 
-
         // Columns.
         $this->define_columns([
             'courseid',
             'courseshortname',
             'coursefullname',
             'filename',
+            'filesize',
             'createdat',
             'actions',
         ]);
@@ -94,27 +107,26 @@ class log_table extends \table_sql
             get_string('course_shortname_header', 'tool_lcbackupcourselogstep'),
             get_string('course_fullname_header', 'tool_lcbackupcourselogstep'),
             get_string('filename_header', 'tool_lcbackupcourselogstep'),
+            get_string('filesize_header', 'tool_lcbackupcoursestep'),
             get_string('createdat_header', 'tool_lcbackupcourselogstep'),
             get_string('actions_header', 'tool_lcbackupcourselogstep'),
         ]);
 
         // Set default sorting.
         $this->sortable(true, 'createdat', SORT_DESC);
+        $this->sortable(true, 'filesize', SORT_DESC);
         $this->collapsible(true);
         $this->initialbars(true);
         $this->set_attribute('class', 'admintable generaltable');
     }
 
     /**
-     * Define download action.
+     * Download action column.
      *
-     * @param $row
-     * @return bool|string
-     * @throws \coding_exception
-     * @throws \moodle_exception
+     * @param object $row
+     * @return string
      */
-    public function col_actions($row)
-    {
+    public function col_actions($row) {
         global $OUTPUT;
 
         $actionmenu = new \action_menu();
@@ -130,15 +142,23 @@ class log_table extends \table_sql
     }
 
     /**
-     * Time when the file is created, displayed in user-friendly format.
+     * Display time when the file was created.
      *
-     * @param $row
+     * @param object $row
      * @return string
-     * @throws \coding_exception
      */
-    public function col_createdat($row)
-    {
+    public function col_createdat($row) {
         return userdate($row->createdat);
+    }
+
+    /**
+     * Display size in user friendly format.
+     *
+     * @param object $row
+     * @return string
+     */
+    public function col_filesize($row) {
+        return display_size($row->filesize);
     }
 
 }

@@ -18,6 +18,7 @@
  * Trigger test for end date delay trigger.
  *
  * @package    tool_lcbackupcourselogstep
+ * @copyright  2024 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 namespace tool_lcbackupcourselogstep\tests;
@@ -31,8 +32,6 @@ use tool_lifecycle\local\manager\workflow_manager;
 use tool_lifecycle\processor;
 use tool_lifecycle\settings_type;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Trigger test for start date delay trigger.
  *
@@ -40,22 +39,43 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class step_test extends \advanced_testcase {
-    /** Icon of the manual trigger. */
+
+    /**
+     * Icon of the manual trigger.
+     * @var string
+     */
     const MANUAL_TRIGGER1_ICON = 't/up';
 
-    /** Display name of the manual trigger. */
+    /**
+     * Display name of the manual trigger.
+     * @var string
+     */
     const MANUAL_TRIGGER1_DISPLAYNAME = 'Up';
 
-    /** Capability of the manual trigger. */
+    /**
+     * Capability of the manual trigger.
+     * @var string
+     */
     const MANUAL_TRIGGER1_CAPABILITY = 'moodle/course:manageactivities';
 
-    /** @var trigger_subplugin $trigger Instances of the triggers under test. */
+    /**
+     * Instances of the triggers under test.
+     * @var trigger_subplugin
+     */
     private $trigger;
 
-    /** @var \stdClass $course Instance of the course under test. */
+    /**
+     * Instance of the course under test.
+     * @var \stdClass
+     */
     private $course;
 
-    public function setUp() : void {
+    /**
+     * Set up the test case.
+     *
+     * @return void
+     */
+    public function setUp(): void {
         global $USER, $DB;
 
         // We do not need a sesskey check in these tests.
@@ -75,7 +95,7 @@ class step_test extends \advanced_testcase {
         // Step.
         $step = $generator->create_step("instance1", "tool_lcbackupcourselogstep", $manualworkflow->id);
         settings_manager::save_settings($step->id, settings_type::STEP, "tool_lcbackupcourselogstep",
-            array("fileformat" => "csv")
+            ["fileformat" => "csv"]
         );
 
         // Course.
@@ -86,7 +106,9 @@ class step_test extends \advanced_testcase {
     }
 
     /**
-     * Test course is hidden.
+     * Test that the notification step creates a log file.
+     * @covers \tool_lcbackupcourselogstep\step::process_course
+     * @return void
      */
     public function test_notification_step() {
         global $DB;
@@ -101,7 +123,7 @@ class step_test extends \advanced_testcase {
         $processor->process_courses();
 
         // Check that the log file is created.
-        $contextid = \context_course::instance($this->course->id)->id;
+        $contextid = \context_system::instance()->id;
         $sql = "contextid = :contextid
                AND component = :component
                AND filearea = :filearea
@@ -112,7 +134,7 @@ class step_test extends \advanced_testcase {
                 'component' => 'tool_lcbackupcourselogstep',
                 'filearea' => 'course_log',
                 'filepath' => '/',
-                'filename' => '.'
+                'filename' => '.',
             ]
         );
 
@@ -122,8 +144,11 @@ class step_test extends \advanced_testcase {
         // Check file name pattern.
         $this->assertThat($file->filename, $this->logicalAnd(
             $this->isType('string'),
-            $this->matchesRegularExpression('/^course_log_' . $this->course->shortname . '_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}\.csv$/')
+            $this->matchesRegularExpression(
+                '/^course_log_' . $this->course->shortname . '_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}\.csv$/'
+            )
         ));
     }
 
 }
+
