@@ -15,9 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Displays backed up logs
+ * Displays backed up logs.
  *
- * @package tool_lcbackupcourselogstep
+ * @package    tool_lcbackupcourselogstep
+ * @copyright  2024 Catalyst IT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 

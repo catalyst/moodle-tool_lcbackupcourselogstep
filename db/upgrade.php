@@ -18,10 +18,16 @@
  * This file handles database upgrades for tool_lcbackupcourselogstep.
  *
  * @package   tool_lcbackupcourselogstep
- * @copyright 2024 Catalyst
+ * @copyright 2024 Catalyst IT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+/**
+ * Handles database upgrades for tool_lcbackupcourselogstep.
+ *
+ * @param int $oldversion The version of the plugin being upgraded from.
+ * @return bool True on success, false on failure.
+ */
 function xmldb_tool_lcbackupcourselogstep_upgrade($oldversion) {
     global $DB;
 
@@ -61,7 +67,7 @@ function xmldb_tool_lcbackupcourselogstep_upgrade($oldversion) {
         $DB->execute($sql1, [
             'contextlevel' => CONTEXT_COURSE,
             'component' => 'tool_lcbackupcourselogstep',
-            'filearea' => 'course_log'
+            'filearea' => 'course_log',
         ]);
 
         $sql2 = "
@@ -80,7 +86,7 @@ function xmldb_tool_lcbackupcourselogstep_upgrade($oldversion) {
             'contextid' => \context_system::instance()->id,
             'contextlevel' => CONTEXT_COURSE,
             'component' => 'tool_lcbackupcourselogstep',
-            'filearea' => 'course_log'
+            'filearea' => 'course_log',
         ]);
 
         upgrade_plugin_savepoint(true, 2024102000, 'tool', 'lcbackupcourselogstep');

@@ -14,14 +14,28 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Course backup logs table.
+ *
+ * @package     tool_lcbackupcourselogstep
+ * @copyright   2024 Catalyst IT
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 namespace tool_lcbackupcourselogstep\lifecycle;
 
 defined('MOODLE_INTERNAL') || die;
 
 require_once($CFG->libdir . '/tablelib.php');
 
-class log_table extends \table_sql
-{
+/**
+ * Backup log table.
+ *
+ * @package     tool_lcbackupcourselogstep
+ * @copyright   2024 Catalyst IT
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class log_table extends \table_sql {
 
     /**
      * @var array "cached" lang strings
@@ -32,16 +46,16 @@ class log_table extends \table_sql
      * Constructor for delayed_courses_table.
      *
      * @throws \coding_exception
+     * @param array $filterdata Filter data.
      */
-    public function __construct($filterdata = [])
-    {
+    public function __construct($filterdata = []) {
         global $DB;
 
         parent::__construct('tool_lcbackupcourselogstep-log');
 
-        // Action buttons string
+        // Action buttons string.
         $this->strings = [
-            'download' => get_string('download')
+            'download' => get_string('download'),
         ];
 
         // Build the SQL.
@@ -50,7 +64,7 @@ class log_table extends \table_sql
                    f.filename as filename, f.filesize as filesize, f.timecreated as createdat';
         $from = '{files} f
                  JOIN {context} c ON c.id = f.contextid
-                 LEFT JOIN {tool_lcbackupcourselogstep_metadata} md ON f.id = md.fileid';         
+                 LEFT JOIN {tool_lcbackupcourselogstep_metadata} md ON f.id = md.fileid';
 
         $where = ["f.component = :component AND filename <> '.'"];
         $params = ['component' => 'tool_lcbackupcourselogstep'];
@@ -76,7 +90,6 @@ class log_table extends \table_sql
         $where = join(" AND ", $where);
 
         $this->set_sql($fields, $from, $where, $params);
-
 
         // Columns.
         $this->define_columns([
@@ -108,15 +121,12 @@ class log_table extends \table_sql
     }
 
     /**
-     * Define download action.
+     * Download action column.
      *
-     * @param $row
-     * @return bool|string
-     * @throws \coding_exception
-     * @throws \moodle_exception
+     * @param object $row
+     * @return string
      */
-    public function col_actions($row)
-    {
+    public function col_actions($row) {
         global $OUTPUT;
 
         $actionmenu = new \action_menu();
@@ -132,21 +142,19 @@ class log_table extends \table_sql
     }
 
     /**
-     * Time when the file is created, displayed in user-friendly format.
+     * Display time when the file was created.
      *
-     * @param $row
+     * @param object $row
      * @return string
-     * @throws \coding_exception
      */
-    public function col_createdat($row)
-    {
+    public function col_createdat($row) {
         return userdate($row->createdat);
     }
 
     /**
-     * Display size in a user-friendly format.
+     * Display size in user friendly format.
      *
-     * @param $row
+     * @param object $row
      * @return string
      */
     public function col_filesize($row) {
