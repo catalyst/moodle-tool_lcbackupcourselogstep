@@ -30,10 +30,11 @@
  */
 function xmldb_tool_lcbackupcourselogstep_upgrade($oldversion) {
     global $DB;
+    $dbman = $DB->get_manager();
 
     if ($oldversion < 2024102000) {
 
-        $table = new xmldb_table('tool_lcbackupcourselogstep_metadata');
+        $table = new xmldb_table('tool_lcbackupcourselogstep_m');
 
         $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
         $table->add_field('shortname', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null);
@@ -50,7 +51,7 @@ function xmldb_tool_lcbackupcourselogstep_upgrade($oldversion) {
         }
 
         $sql1 = "
-            INSERT INTO {tool_lcbackupcourselogstep_metadata} (shortname, fullname, oldcourseid, fileid, timecreated)
+            INSERT INTO {tool_lcbackupcourselogstep_m} (shortname, fullname, oldcourseid, fileid, timecreated)
             SELECT crs.shortname,
                    crs.fullname,
                    crs.id AS oldcourseid,
@@ -74,13 +75,15 @@ function xmldb_tool_lcbackupcourselogstep_upgrade($oldversion) {
             UPDATE {files}
                SET contextid = :contextid
              WHERE id IN (
-                    SELECT f.id
-                      FROM {files} f
-                      JOIN {context} ctx ON ctx.id = f.contextid
-                     WHERE ctx.contextlevel = :contextlevel
-                       AND f.component = :component
-                       AND f.filearea = :filearea
-                   )
+                    SELECT id FROM (
+                        SELECT f.id
+                          FROM {files} f
+                          JOIN {context} ctx ON ctx.id = f.contextid
+                         WHERE ctx.contextlevel = :contextlevel
+                           AND f.component = :component
+                           AND f.filearea = :filearea
+                       ) as fs
+                  )
         ";
         $DB->execute($sql2, [
             'contextid' => \context_system::instance()->id,
@@ -90,6 +93,13 @@ function xmldb_tool_lcbackupcourselogstep_upgrade($oldversion) {
         ]);
 
         upgrade_plugin_savepoint(true, 2024102000, 'tool', 'lcbackupcourselogstep');
+    }
+    if ($oldversion < 2025022000) {
+        $table = new xmldb_table('tool_lcbackupcourselogstep_metadata');
+        if ($dbman->table_exists($table)) {
+            $dbman->rename_table($table, 'tool_lcbackupcourselogstep_m');
+        }
+        upgrade_plugin_savepoint(true, 2025022000, 'tool', 'lcbackupcourselogstep');
     }
 
     return true;

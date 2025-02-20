@@ -64,7 +64,7 @@ class log_table extends \table_sql {
                    f.filename as filename, f.filesize as filesize, f.timecreated as createdat';
         $from = '{files} f
                  JOIN {context} c ON c.id = f.contextid
-                 LEFT JOIN {tool_lcbackupcourselogstep_metadata} md ON f.id = md.fileid';
+                 LEFT JOIN {tool_lcbackupcourselogstep_m} md ON f.id = md.fileid';
 
         $where = ["f.component = :component AND filename <> '.'"];
         $params = ['component' => 'tool_lcbackupcourselogstep'];

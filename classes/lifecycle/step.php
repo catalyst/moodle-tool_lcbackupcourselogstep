@@ -131,7 +131,7 @@ class step extends libbase {
         // Write data to file.
         $newfile = dataformat::write_data_to_filearea($filerecord, $fileformat, $columns, $logs);
 
-        $DB->insert_record('tool_lcbackupcourselogstep_metadata', [
+        $DB->insert_record('tool_lcbackupcourselogstep_m', [
             'shortname' => $course->shortname,
             'fullname' => $course->fullname,
             'oldcourseid' => $course->id,
