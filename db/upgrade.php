@@ -34,7 +34,7 @@ function xmldb_tool_lcbackupcourselogstep_upgrade($oldversion) {
 
     if ($oldversion < 2024102000) {
 
-        $table = new xmldb_table('tool_lcbackupcourselogstep_m');
+        $table = new xmldb_table('tool_lcbackupcourselogstep_metadata');
 
         $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
         $table->add_field('shortname', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null);
@@ -51,7 +51,7 @@ function xmldb_tool_lcbackupcourselogstep_upgrade($oldversion) {
         }
 
         $sql1 = "
-            INSERT INTO {tool_lcbackupcourselogstep_m} (shortname, fullname, oldcourseid, fileid, timecreated)
+            INSERT INTO {tool_lcbackupcourselogstep_metadata} (shortname, fullname, oldcourseid, fileid, timecreated)
             SELECT crs.shortname,
                    crs.fullname,
                    crs.id AS oldcourseid,

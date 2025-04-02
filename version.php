@@ -31,3 +31,4 @@ $plugin->component = 'tool_lcbackupcourselogstep';
 $plugin->dependencies = [
     'tool_lifecycle' => 2023050201,
 ];
+$plugin->supported = [401, 405];
