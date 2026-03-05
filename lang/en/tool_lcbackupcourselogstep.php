@@ -23,6 +23,7 @@
  */
 
 $string['pluginname'] = 'Backup course log step';
+$string['plugindescription'] = 'This step allows to backup course logs.';
 $string['privacy:metadata'] = 'The plugin does not store any personal data.';
 $string['fileformat'] = 'Log file format.';
 $string['courselogs'] = 'Backed up course logs';
